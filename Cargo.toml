@@ -1,0 +1,32 @@
+[package]
+name = "glam-ext"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["std"]
+
+std = ["glam/std"]
+scalar-math = ["glam/scalar-math"]
+cuda = ["glam/cuda"]
+fast-math = ["glam/fast-math"]
+core-simd = ["glam/core-simd"]
+
+approx = ["glam/approx"]
+bytemuck = ["glam/bytemuck"]
+libm = ["glam/libm"]
+mint = ["glam/mint"]
+rand = ["glam/rand"]
+serde = ["dep:serde", "glam/serde"]
+rkyv = ["dep:rkyv", "glam/rkyv"]
+bytecheck = ["glam/bytecheck"]
+
+[dependencies]
+glam = { version = "0.27", default-features = false }
+
+serde = { version = "1.0", optional = true, default-features = false }
+rkyv = { version = "0.7", optional = true, default-features = false }
+
+[dev-dependencies]
+# Set a size_xx feature so that this crate compiles properly with --all-targets --all-features
+rkyv = { version = "0.7", default-features = false, features = ["size_32"] }
