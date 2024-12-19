@@ -7,6 +7,8 @@ edition = "2021"
 default = ["std"]
 
 std = ["glam/std"]
+debug-glam-assert = ["glam/debug-glam-assert"]
+glam-assert = ["glam/glam-assert"]
 scalar-math = ["glam/scalar-math"]
 cuda = ["glam/cuda"]
 fast-math = ["glam/fast-math"]
