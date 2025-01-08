@@ -1,6 +1,5 @@
-use core::ops::Mul;
+use core::ops::{Mul, MulAssign};
 use glam::{Affine3A, Mat3, Mat3A, Mat4, Quat, Vec3, Vec3A};
-use std::ops::MulAssign;
 
 use crate::macros::glam_assert;
 
