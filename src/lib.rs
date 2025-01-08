@@ -1,9 +1,8 @@
-mod isometry3a;
+pub mod f32_ext;
+pub mod f64_ext;
 mod macros;
-mod math;
-mod transform3a;
 
-pub use isometry3a::*;
-pub use transform3a::*;
+pub use f32_ext::*;
+pub use f64_ext::*;
 
 pub use glam::*;
