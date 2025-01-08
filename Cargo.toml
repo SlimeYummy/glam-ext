@@ -1,7 +1,17 @@
 [package]
 name = "glam-ext"
-version = "0.1.0"
+version = "0.2.1"
+authors = ["SlimeYummy <zzzcccnnn@outlook.com>"]
 edition = "2021"
+rust-version = "1.75"
+description = "Transform, isometry and more extension types for glam-rs."
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/SlimeYummy/glam-ext"
+repository = "https://github.com/SlimeYummy/glam-ext"
+keywords = ["gamedev", "math", "matrix", "vector", "quaternion"]
+categories = ["game-engines", "no-std"]
+exclude = ["/.circleci", "/.github"]
+resolver = "2"
 
 [features]
 default = ["std"]
