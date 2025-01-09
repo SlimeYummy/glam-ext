@@ -5,4 +5,5 @@ mod macros;
 pub use f32_ext::*;
 pub use f64_ext::*;
 
+#[doc(hidden)]
 pub use glam::*;
