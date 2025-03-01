@@ -5,6 +5,8 @@ use crate::macros::glam_assert;
 
 #[repr(C)]
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 pub struct DTransform3 {
     pub translation: DVec3,
     pub rotation: DQuat,

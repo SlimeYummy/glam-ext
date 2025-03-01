@@ -3,6 +3,8 @@ use glam::{Affine3A, Mat3, Mat4, Quat, Vec3, Vec3A};
 
 #[repr(C)]
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 pub struct Isometry3A {
     pub translation: Vec3A,
     pub rotation: Quat,
