@@ -1,3 +1,5 @@
+#[cfg(feature = "approx")]
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Mul, MulAssign};
 use glam::{Affine3A, Mat3, Mat3A, Mat4, Quat, Vec3, Vec3A};
 
@@ -352,6 +354,53 @@ impl Mul<Transform3A> for Mat4 {
     #[inline]
     fn mul(self, rhs: Transform3A) -> Self::Output {
         self * Mat4::from(rhs)
+    }
+}
+
+#[cfg(feature = "approx")]
+impl AbsDiffEq for Transform3A {
+    type Epsilon = <f32 as AbsDiffEq>::Epsilon;
+
+    #[inline]
+    fn default_epsilon() -> Self::Epsilon {
+        f32::default_epsilon()
+    }
+
+    #[inline]
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.translation.abs_diff_eq(other.translation, epsilon)
+            && self.rotation.abs_diff_eq(other.rotation, epsilon)
+            && self.scale.abs_diff_eq(other.scale, epsilon)
+    }
+}
+
+#[cfg(feature = "approx")]
+impl RelativeEq for Transform3A {
+    #[inline]
+    fn default_max_relative() -> Self::Epsilon {
+        f32::default_max_relative()
+    }
+
+    #[inline]
+    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+        self.translation.relative_eq(&other.translation, epsilon, max_relative)
+            && self.rotation.relative_eq(&other.rotation, epsilon, max_relative)
+            && self.scale.relative_eq(&other.scale, epsilon, max_relative)
+    }
+}
+
+#[cfg(feature = "approx")]
+impl UlpsEq for Transform3A {
+    #[inline]
+    fn default_max_ulps() -> u32 {
+        f32::default_max_ulps()
+    }
+
+    #[inline]
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.translation.ulps_eq(&other.translation, epsilon, max_ulps)
+            && self.rotation.ulps_eq(&other.rotation, epsilon, max_ulps)
+            && self.scale.ulps_eq(&other.scale, epsilon, max_ulps)
     }
 }
 

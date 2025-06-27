@@ -1,3 +1,5 @@
+#[cfg(feature = "approx")]
+use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 use core::ops::{Mul, MulAssign};
 use glam::{DAffine3, DMat3, DMat4, DQuat, DVec3};
 
@@ -38,10 +40,7 @@ impl DIsometry3 {
     #[inline]
     #[must_use]
     pub fn new(translation: DVec3, rotation: DQuat) -> Self {
-        Self {
-            translation,
-            rotation,
-        }
+        Self { translation, rotation }
     }
 
     /// Creates a isometry isometry from the given `rotation` quaternion.
@@ -112,10 +111,7 @@ impl DIsometry3 {
     #[inline]
     #[must_use]
     pub fn from_rotation_translation(rotation: DQuat, translation: DVec3) -> Self {
-        Self {
-            translation,
-            rotation,
-        }
+        Self { translation, rotation }
     }
 
     /// Creates a isometry from a 3x3 matrix (expressing scale and rotation)
@@ -263,6 +259,49 @@ impl Mul<DIsometry3> for DMat4 {
     #[inline]
     fn mul(self, rhs: DIsometry3) -> Self::Output {
         self * DMat4::from(rhs)
+    }
+}
+
+#[cfg(feature = "approx")]
+impl AbsDiffEq for DIsometry3 {
+    type Epsilon = <f64 as AbsDiffEq>::Epsilon;
+
+    #[inline]
+    fn default_epsilon() -> Self::Epsilon {
+        f64::default_epsilon()
+    }
+
+    #[inline]
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.translation.abs_diff_eq(other.translation, epsilon) && self.rotation.abs_diff_eq(other.rotation, epsilon)
+    }
+}
+
+#[cfg(feature = "approx")]
+impl RelativeEq for DIsometry3 {
+    #[inline]
+    fn default_max_relative() -> Self::Epsilon {
+        f64::default_max_relative()
+    }
+
+    #[inline]
+    fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+        self.translation.relative_eq(&other.translation, epsilon, max_relative)
+            && self.rotation.relative_eq(&other.rotation, epsilon, max_relative)
+    }
+}
+
+#[cfg(feature = "approx")]
+impl UlpsEq for DIsometry3 {
+    #[inline]
+    fn default_max_ulps() -> u32 {
+        f64::default_max_ulps()
+    }
+
+    #[inline]
+    fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
+        self.translation.ulps_eq(&other.translation, epsilon, max_ulps)
+            && self.rotation.ulps_eq(&other.rotation, epsilon, max_ulps)
     }
 }
 
