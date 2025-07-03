@@ -452,7 +452,7 @@ impl Vec2xz {
             self.dot(rhs) / math::sqrt(self.length_squared() * rhs.length_squared()),
         );
 
-        angle * -math::signum(self.perp_dot(rhs))
+        angle * math::signum(rhs.perp_dot(self))
     }
 
     /// Returns the angle of rotation (in radians) from `self` to `rhs` in the range `[-π, +π]`.
@@ -463,7 +463,13 @@ impl Vec2xz {
         assert!(self.is_normalized());
         assert!(rhs.is_normalized());
         let angle = math::acos_approx(self.dot(rhs));
-        angle * -math::signum(self.perp_dot(rhs))
+        angle * math::signum(rhs.perp_dot(self))
+    }
+
+    /// Return the sign of the angle between `self` and `rhs` in the range `[-1, +1]`.
+    #[inline]
+    pub fn angle_to_sign(self, rhs: Self) -> f32 {
+        math::signum(rhs.perp_dot(self))
     }
 
     #[inline]
@@ -850,5 +856,105 @@ impl From<BVec2> for Vec2xz {
     #[inline]
     fn from(v: BVec2) -> Self {
         Self::new(f32::from(v.x), f32::from(v.y))
+    }
+}
+
+#[cfg(feature = "approx")]
+#[cfg(test)]
+mod test {
+    use std::f32::consts::{PI, FRAC_PI_2, FRAC_PI_3, FRAC_PI_4, FRAC_PI_6};
+    use glam::{Quat, Vec3, Vec3Swizzles};
+    use approx::assert_abs_diff_eq;
+
+    use super::*;
+
+    #[test]
+    fn test_from_angle() {
+        fn tester(angle: f32) {
+            let r2 = Vec2xz::from_angle(angle);
+            let r3 = Quat::from_rotation_y(angle);
+            // println!("{:?} : {:?}", r2, Vec2::from_angle(angle));
+            assert_abs_diff_eq!(r2.rotate(Vec2xz::X).as_vec2(), (r3 * Vec3::X).xz());
+            assert_abs_diff_eq!(r2.rotate(Vec2xz::Z).as_vec2(), (r3 * Vec3::Z).xz());
+        }
+
+        tester(0.0);
+        tester(FRAC_PI_6);
+        tester(FRAC_PI_4);
+        tester(FRAC_PI_2);
+        tester(FRAC_PI_2 + FRAC_PI_6);
+        tester(PI);
+        tester(-FRAC_PI_6);
+        tester(-FRAC_PI_4);
+        tester(-FRAC_PI_2);
+        tester(-FRAC_PI_2 - FRAC_PI_6);
+        tester(-PI);
+    }
+
+    #[test]
+    fn test_to_angle() {
+        fn tester(angle: f32) {
+            let v3 = Quat::from_rotation_y(angle) * Vec3::X;
+            let a = Vec2xz::from_vec2(v3.xz()).to_angle();
+            // println!("{:?} : {:?}", Vec2xz::from_vec2(v3.xz()).to_angle(), v3.xz().to_angle());
+            assert_abs_diff_eq!(angle, a);
+        }
+
+        tester(0.0);
+        tester(FRAC_PI_3);
+        tester(FRAC_PI_4);
+        tester(FRAC_PI_2);
+        tester(FRAC_PI_2 + FRAC_PI_3);
+        tester(-FRAC_PI_3);
+        tester(-FRAC_PI_4);
+        tester(-FRAC_PI_2);
+        tester(-FRAC_PI_2 - FRAC_PI_3);
+
+        let v3 = Quat::from_rotation_y(PI) * Vec3::X;
+        let a = Vec2xz::from_vec2(v3.xz()).to_angle();
+        assert_abs_diff_eq!(a, -PI, epsilon = 1e-6);
+
+        let v3 = Quat::from_rotation_y(-PI) * Vec3::X;
+        let a = Vec2xz::from_vec2(v3.xz()).to_angle();
+        assert_abs_diff_eq!(a, PI, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn test_angle_to() {
+        fn tester(angle_from: f32, angle_to: f32) {
+            let v_from = Quat::from_rotation_y(angle_from) * Vec3::X;
+            let v_to = Quat::from_rotation_y(angle_to) * Vec3::X;
+            let a = Vec2xz::from_vec2(v_from.xz()).angle_to(Vec2xz::from_vec2(v_to.xz()));
+            assert_abs_diff_eq!(angle_to - angle_from, a, epsilon = 1e-6);
+        }
+
+        tester(0.0, 0.0);
+        tester(0.0, FRAC_PI_6);
+        tester(0.0, FRAC_PI_4);
+        tester(0.0, FRAC_PI_2);
+        tester(0.0, FRAC_PI_2 + FRAC_PI_6);
+        tester(0.0, -FRAC_PI_6);
+        tester(0.0, -FRAC_PI_4);
+        tester(0.0, -FRAC_PI_2);
+        tester(0.0, -FRAC_PI_2 - FRAC_PI_6);
+
+        tester(FRAC_PI_4, FRAC_PI_2);
+        tester(-FRAC_PI_4, -FRAC_PI_2);
+        tester(FRAC_PI_2, FRAC_PI_2 + FRAC_PI_6);
+        tester(FRAC_PI_2, FRAC_PI_2 - FRAC_PI_6);
+        
+        let v_from = Quat::from_rotation_y(0.0) * Vec3::X;
+        let v_to = Quat::from_rotation_y(PI) * Vec3::X;
+        let a = Vec2xz::from_vec2(v_from.xz()).angle_to(Vec2xz::from_vec2(v_to.xz()));
+        assert_abs_diff_eq!(-PI, a, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn test_rotate_towards() {
+        assert_abs_diff_eq!(Vec2xz::X.rotate_towards(Vec2xz::Z, FRAC_PI_6), Vec2xz::from_angle(-FRAC_PI_6));
+        assert_abs_diff_eq!(Vec2xz::Z.rotate_towards(Vec2xz::X, FRAC_PI_6), Vec2xz::from_angle(-FRAC_PI_3));
+        
+        assert_abs_diff_eq!(Vec2xz::X.rotate_towards(Vec2xz::Z, FRAC_PI_4), Vec2xz::from_angle(-FRAC_PI_4));
+        assert_abs_diff_eq!(Vec2xz::X.rotate_towards(Vec2xz::Z, -FRAC_PI_4), Vec2xz::from_angle(FRAC_PI_4));
     }
 }

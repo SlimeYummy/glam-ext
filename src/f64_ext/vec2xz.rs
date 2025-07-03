@@ -462,6 +462,12 @@ impl DVec2xz {
         angle * math::signum(rhs.perp_dot(self))
     }
 
+    /// Return the sign of the angle between `self` and `rhs` in the range `[-1, +1]`.
+    #[inline]
+    pub fn angle_to_sign(self, rhs: Self) -> f64 {
+        math::signum(rhs.perp_dot(self))
+    }
+
     #[inline]
     pub fn perp(self) -> Self {
         v2xz(xz2v(self).perp())
@@ -846,5 +852,105 @@ impl From<BVec2> for DVec2xz {
     #[inline]
     fn from(v: BVec2) -> Self {
         Self::new(f64::from(v.x), f64::from(v.y))
+    }
+}
+
+#[cfg(feature = "approx")]
+#[cfg(test)]
+mod test {
+    use std::f64::consts::{PI, FRAC_PI_2, FRAC_PI_3, FRAC_PI_4, FRAC_PI_6};
+    use glam::{DQuat, DVec3, Vec3Swizzles};
+    use approx::assert_abs_diff_eq;
+
+    use super::*;
+
+    #[test]
+    fn test_from_angle() {
+        fn tester(angle: f64) {
+            let r2 = DVec2xz::from_angle(angle);
+            let r3 = DQuat::from_rotation_y(angle);
+            // println!("{:?} : {:?}", r2, DVec2::from_angle(angle));
+            assert_abs_diff_eq!(r2.rotate(DVec2xz::X).as_dvec2(), (r3 * DVec3::X).xz());
+            assert_abs_diff_eq!(r2.rotate(DVec2xz::Z).as_dvec2(), (r3 * DVec3::Z).xz());
+        }
+
+        tester(0.0);
+        tester(FRAC_PI_6);
+        tester(FRAC_PI_4);
+        tester(FRAC_PI_2);
+        tester(FRAC_PI_2 + FRAC_PI_6);
+        tester(PI);
+        tester(-FRAC_PI_6);
+        tester(-FRAC_PI_4);
+        tester(-FRAC_PI_2);
+        tester(-FRAC_PI_2 - FRAC_PI_6);
+        tester(-PI);
+    }
+
+    #[test]
+    fn test_to_angle() {
+        fn tester(angle: f64) {
+            let v3 = DQuat::from_rotation_y(angle) * DVec3::X;
+            let a = DVec2xz::from_dvec2(v3.xz()).to_angle();
+            // println!("{:?} : {:?}", DVec2xz::from_dvec2(v3.xz()).to_angle(), v3.xz().to_angle());
+            assert_abs_diff_eq!(angle, a);
+        }
+
+        tester(0.0);
+        tester(FRAC_PI_3);
+        tester(FRAC_PI_4);
+        tester(FRAC_PI_2);
+        tester(FRAC_PI_2 + FRAC_PI_3);
+        tester(-FRAC_PI_3);
+        tester(-FRAC_PI_4);
+        tester(-FRAC_PI_2);
+        tester(-FRAC_PI_2 - FRAC_PI_3);
+
+        let v3 = DQuat::from_rotation_y(PI) * DVec3::X;
+        let a = DVec2xz::from_dvec2(v3.xz()).to_angle();
+        assert_abs_diff_eq!(a, PI, epsilon = 1e-6);
+
+        let v3 = DQuat::from_rotation_y(-PI) * DVec3::X;
+        let a = DVec2xz::from_dvec2(v3.xz()).to_angle();
+        assert_abs_diff_eq!(a, -PI, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn test_angle_to() {
+        fn tester(angle_from: f64, angle_to: f64) {
+            let v_from = DQuat::from_rotation_y(angle_from) * DVec3::X;
+            let v_to = DQuat::from_rotation_y(angle_to) * DVec3::X;
+            let a = DVec2xz::from_dvec2(v_from.xz()).angle_to(DVec2xz::from_dvec2(v_to.xz()));
+            assert_abs_diff_eq!(angle_to - angle_from, a, epsilon = 1e-6);
+        }
+
+        tester(0.0, 0.0);
+        tester(0.0, FRAC_PI_6);
+        tester(0.0, FRAC_PI_4);
+        tester(0.0, FRAC_PI_2);
+        tester(0.0, FRAC_PI_2 + FRAC_PI_6);
+        tester(0.0, -FRAC_PI_6);
+        tester(0.0, -FRAC_PI_4);
+        tester(0.0, -FRAC_PI_2);
+        tester(0.0, -FRAC_PI_2 - FRAC_PI_6);
+
+        tester(FRAC_PI_4, FRAC_PI_2);
+        tester(-FRAC_PI_4, -FRAC_PI_2);
+        tester(FRAC_PI_2, FRAC_PI_2 + FRAC_PI_6);
+        tester(FRAC_PI_2, FRAC_PI_2 - FRAC_PI_6);
+        
+        let v_from = DQuat::from_rotation_y(0.0) * DVec3::X;
+        let v_to = DQuat::from_rotation_y(PI) * DVec3::X;
+        let a = DVec2xz::from_dvec2(v_from.xz()).angle_to(DVec2xz::from_dvec2(v_to.xz()));
+        assert_abs_diff_eq!(PI, a, epsilon = 1e-6);
+    }
+
+    #[test]
+    fn test_rotate_towards() {
+        assert_abs_diff_eq!(DVec2xz::X.rotate_towards(DVec2xz::Z, FRAC_PI_6), DVec2xz::from_angle(-FRAC_PI_6));
+        assert_abs_diff_eq!(DVec2xz::Z.rotate_towards(DVec2xz::X, FRAC_PI_6), DVec2xz::from_angle(-FRAC_PI_3));
+        
+        assert_abs_diff_eq!(DVec2xz::X.rotate_towards(DVec2xz::Z, FRAC_PI_4), DVec2xz::from_angle(-FRAC_PI_4));
+        assert_abs_diff_eq!(DVec2xz::X.rotate_towards(DVec2xz::Z, -FRAC_PI_4), DVec2xz::from_angle(FRAC_PI_4));
     }
 }
