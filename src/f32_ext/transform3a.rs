@@ -53,6 +53,17 @@ impl Transform3A {
         }
     }
 
+    /// Creates a new transform.
+    #[inline]
+    #[must_use]
+    pub fn new_3a(translation: Vec3A, rotation: Quat, scale: Vec3) -> Self {
+        Self {
+            translation,
+            rotation,
+            scale: scale.into(),
+        }
+    }
+
     /// Creates an affine transform that changes scale.
     /// Note that if any scale is zero the transform will be non-invertible.
     #[inline]

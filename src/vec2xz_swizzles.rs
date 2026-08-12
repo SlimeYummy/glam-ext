@@ -1,6 +1,10 @@
-use glam::{Vec3, Vec4, DVec3, DVec4};
+use glam::{Vec3, Vec4};
+#[cfg(feature = "f64")]
+use glam::{DVec3, DVec4};
 
-use crate::{Vec2xz, DVec2xz};
+use crate::Vec2xz;
+#[cfg(feature = "f64")]
+use crate::DVec2xz;
 
 macro_rules! vecxz_swizzles {
     ($type:ident, $vec3:ident, $vec4:ident) => {
@@ -139,9 +143,10 @@ macro_rules! vecxz_swizzles {
             pub fn zzzz(self) -> $vec4 {
                 $vec4::new(self.z, self.z, self.z, self.z)
             }
-        }        
+        }
     };
 }
 
 vecxz_swizzles!(Vec2xz, Vec3, Vec4);
+#[cfg(feature = "f64")]
 vecxz_swizzles!(DVec2xz, DVec3, DVec4);

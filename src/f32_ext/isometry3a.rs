@@ -46,6 +46,13 @@ impl Isometry3A {
         }
     }
 
+    /// Creates a new isometry.
+    #[inline]
+    #[must_use]
+    pub fn new_3a(translation: Vec3A, rotation: Quat) -> Self {
+        Self { translation, rotation }
+    }
+
     /// Creates a isometry isometry from the given `rotation` quaternion.
     #[inline]
     #[must_use]

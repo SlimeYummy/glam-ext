@@ -1,8 +1,8 @@
-mod isometry3a;
+mod isometry3;
 mod math;
-mod transform3a;
+mod transform3;
 mod vec2xz;
 
-pub use isometry3a::*;
-pub use transform3a::*;
+pub use isometry3::*;
+pub use transform3::*;
 pub use vec2xz::*;
