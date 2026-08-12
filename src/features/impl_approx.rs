@@ -1,4 +1,6 @@
-use crate::{Vec2xz, DVec2xz};
+use crate::Vec2xz;
+#[cfg(feature = "f64")]
+use crate::DVec2xz;
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 macro_rules! impl_approx_as_ref {
@@ -17,14 +19,8 @@ macro_rules! impl_approx_as_ref {
             fn default_max_relative() -> Self::Epsilon {
                 $prim::default_max_relative()
             }
-            fn relative_eq(
-                &self,
-                other: &Self,
-                epsilon: Self::Epsilon,
-                max_relative: Self::Epsilon,
-            ) -> bool {
-                self.as_ref()
-                    .relative_eq(other.as_ref(), epsilon, max_relative)
+            fn relative_eq(&self, other: &Self, epsilon: Self::Epsilon, max_relative: Self::Epsilon) -> bool {
+                self.as_ref().relative_eq(other.as_ref(), epsilon, max_relative)
             }
         }
 
@@ -40,4 +36,5 @@ macro_rules! impl_approx_as_ref {
 }
 
 impl_approx_as_ref!(f32, Vec2xz);
+#[cfg(feature = "f64")]
 impl_approx_as_ref!(f64, DVec2xz);

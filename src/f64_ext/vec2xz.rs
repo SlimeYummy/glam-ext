@@ -1,7 +1,7 @@
-use glam::{BVec2, DVec2, DVec3};
 use core::fmt;
 use core::iter::{Product, Sum};
 use core::ops::*;
+use glam::{BVec2, DVec2, DVec3};
 
 use super::math;
 
@@ -88,10 +88,15 @@ impl DVec2xz {
     pub const fn to_array(&self) -> [f64; 2] {
         [self.x, self.z]
     }
-    
+
     #[inline]
     pub const fn from_dvec2(xy: DVec2) -> Self {
         v2xz(xy)
+    }
+
+    #[inline]
+    pub const fn from_dvec3(v: DVec3) -> Self {
+        Self::new(v.x, v.z)
     }
 
     #[inline]
@@ -444,9 +449,7 @@ impl DVec2xz {
     /// The inputs do not need to be unit vectors however they must be non-zero.
     #[inline]
     pub fn angle_to(self, rhs: Self) -> f64 {
-        let angle = math::acos_approx(
-            self.dot(rhs) / math::sqrt(self.length_squared() * rhs.length_squared()),
-        );
+        let angle = math::acos_approx(self.dot(rhs) / math::sqrt(self.length_squared() * rhs.length_squared()));
 
         angle * math::signum(rhs.perp_dot(self))
     }
@@ -508,41 +511,49 @@ impl DVec2xz {
         xz2v(*self).as_vec2()
     }
 
+    #[cfg(feature = "i8")]
     #[inline]
     pub fn as_i8vec2(&self) -> glam::I8Vec2 {
         xz2v(*self).as_i8vec2()
     }
 
+    #[cfg(feature = "u8")]
     #[inline]
     pub fn as_u8vec2(&self) -> glam::U8Vec2 {
         xz2v(*self).as_u8vec2()
     }
 
+    #[cfg(feature = "i16")]
     #[inline]
     pub fn as_i16vec2(&self) -> glam::I16Vec2 {
         xz2v(*self).as_i16vec2()
     }
 
+    #[cfg(feature = "u16")]
     #[inline]
     pub fn as_u16vec2(&self) -> glam::U16Vec2 {
         xz2v(*self).as_u16vec2()
     }
 
+    #[cfg(feature = "i32")]
     #[inline]
     pub fn as_ivec2(&self) -> glam::IVec2 {
         xz2v(*self).as_ivec2()
     }
 
+    #[cfg(feature = "u32")]
     #[inline]
     pub fn as_uvec2(&self) -> glam::UVec2 {
         xz2v(*self).as_uvec2()
     }
 
+    #[cfg(feature = "i64")]
     #[inline]
     pub fn as_i64vec2(&self) -> glam::I64Vec2 {
         xz2v(*self).as_i64vec2()
     }
 
+    #[cfg(feature = "u64")]
     #[inline]
     pub fn as_u64vec2(&self) -> glam::U64Vec2 {
         xz2v(*self).as_u64vec2()
@@ -813,10 +824,7 @@ impl fmt::Display for DVec2xz {
 
 impl fmt::Debug for DVec2xz {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.debug_tuple("DVec2xz")
-            .field(&self.x)
-            .field(&self.z)
-            .finish()
+        fmt.debug_tuple("DVec2xz").field(&self.x).field(&self.z).finish()
     }
 }
 
@@ -858,9 +866,9 @@ impl From<BVec2> for DVec2xz {
 #[cfg(feature = "approx")]
 #[cfg(test)]
 mod test {
-    use std::f64::consts::{PI, FRAC_PI_2, FRAC_PI_3, FRAC_PI_4, FRAC_PI_6};
-    use glam::{DQuat, DVec3, Vec3Swizzles};
     use approx::assert_abs_diff_eq;
+    use glam::{DQuat, DVec3, Vec3Swizzles};
+    use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4, FRAC_PI_6, PI};
 
     use super::*;
 
@@ -938,7 +946,7 @@ mod test {
         tester(-FRAC_PI_4, -FRAC_PI_2);
         tester(FRAC_PI_2, FRAC_PI_2 + FRAC_PI_6);
         tester(FRAC_PI_2, FRAC_PI_2 - FRAC_PI_6);
-        
+
         let v_from = DQuat::from_rotation_y(0.0) * DVec3::X;
         let v_to = DQuat::from_rotation_y(PI) * DVec3::X;
         let a = DVec2xz::from_dvec2(v_from.xz()).angle_to(DVec2xz::from_dvec2(v_to.xz()));
@@ -955,10 +963,22 @@ mod test {
 
     #[test]
     fn test_rotate_towards() {
-        assert_abs_diff_eq!(DVec2xz::X.rotate_towards(DVec2xz::Z, FRAC_PI_6), DVec2xz::from_angle(-FRAC_PI_6));
-        assert_abs_diff_eq!(DVec2xz::Z.rotate_towards(DVec2xz::X, FRAC_PI_6), DVec2xz::from_angle(-FRAC_PI_3));
-        
-        assert_abs_diff_eq!(DVec2xz::X.rotate_towards(DVec2xz::Z, FRAC_PI_4), DVec2xz::from_angle(-FRAC_PI_4));
-        assert_abs_diff_eq!(DVec2xz::X.rotate_towards(DVec2xz::Z, -FRAC_PI_4), DVec2xz::from_angle(FRAC_PI_4));
+        assert_abs_diff_eq!(
+            DVec2xz::X.rotate_towards(DVec2xz::Z, FRAC_PI_6),
+            DVec2xz::from_angle(-FRAC_PI_6)
+        );
+        assert_abs_diff_eq!(
+            DVec2xz::Z.rotate_towards(DVec2xz::X, FRAC_PI_6),
+            DVec2xz::from_angle(-FRAC_PI_3)
+        );
+
+        assert_abs_diff_eq!(
+            DVec2xz::X.rotate_towards(DVec2xz::Z, FRAC_PI_4),
+            DVec2xz::from_angle(-FRAC_PI_4)
+        );
+        assert_abs_diff_eq!(
+            DVec2xz::X.rotate_towards(DVec2xz::Z, -FRAC_PI_4),
+            DVec2xz::from_angle(FRAC_PI_4)
+        );
     }
 }
