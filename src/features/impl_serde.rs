@@ -2,9 +2,9 @@ use serde::de::{self, Deserialize, Deserializer, SeqAccess, Visitor};
 use serde::ser::{Serialize, SerializeTupleStruct, Serializer};
 use std::fmt;
 
-use crate::Vec2xz;
 #[cfg(feature = "f64")]
 use crate::DVec2xz;
+use crate::Vec2xz;
 
 macro_rules! impl_serde_vec2 {
     ($t:ty, $vec2:ident) => {

@@ -1,6 +1,6 @@
-use crate::Vec2xz;
 #[cfg(feature = "f64")]
 use crate::DVec2xz;
+use crate::Vec2xz;
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 macro_rules! impl_approx_as_ref {

@@ -1,6 +1,6 @@
 use core::fmt;
 use core::iter::{Product, Sum};
-use core::{f32, ops::*};
+use core::ops::*;
 use glam::{BVec2, Vec2, Vec3, Vec3A};
 
 use super::math;

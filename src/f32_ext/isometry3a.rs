@@ -4,12 +4,19 @@ use core::ops::{Mul, MulAssign};
 use glam::{Affine3A, Mat3, Mat4, Quat, Vec3, Vec3A};
 
 #[repr(C)]
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 pub struct Isometry3A {
     pub translation: Vec3A,
     pub rotation: Quat,
+}
+
+impl Default for Isometry3A {
+    #[inline]
+    fn default() -> Self {
+        Self::IDENTITY
+    }
 }
 
 impl Isometry3A {
@@ -206,7 +213,7 @@ impl Isometry3A {
     #[inline]
     #[must_use]
     pub fn is_nan(&self) -> bool {
-        self.translation.is_nan() && self.rotation.is_nan()
+        self.translation.is_nan() || self.rotation.is_nan()
     }
 
     /// Returns true if the absolute difference of all elements between `self` and `rhs`
