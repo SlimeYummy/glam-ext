@@ -4,12 +4,19 @@ use core::ops::{Mul, MulAssign};
 use glam::{DAffine3, DMat3, DMat4, DQuat, DVec3};
 
 #[repr(C)]
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 pub struct DIsometry3 {
     pub translation: DVec3,
     pub rotation: DQuat,
+}
+
+impl Default for DIsometry3 {
+    #[inline]
+    fn default() -> Self {
+        Self::IDENTITY
+    }
 }
 
 impl DIsometry3 {
@@ -179,7 +186,7 @@ impl DIsometry3 {
     #[inline]
     #[must_use]
     pub fn is_nan(&self) -> bool {
-        self.translation.is_nan() && self.rotation.is_nan()
+        self.translation.is_nan() || self.rotation.is_nan()
     }
 
     /// Returns true if the absolute difference of all elements between `self` and `rhs`

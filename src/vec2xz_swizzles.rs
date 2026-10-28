@@ -1,10 +1,10 @@
-use glam::{Vec3, Vec4};
 #[cfg(feature = "f64")]
 use glam::{DVec3, DVec4};
+use glam::{Vec3, Vec4};
 
-use crate::Vec2xz;
 #[cfg(feature = "f64")]
 use crate::DVec2xz;
+use crate::Vec2xz;
 
 macro_rules! vecxz_swizzles {
     ($type:ident, $vec3:ident, $vec4:ident) => {

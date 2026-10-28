@@ -6,13 +6,20 @@ use glam::{DAffine3, DMat3, DMat4, DQuat, DVec3};
 use crate::macros::glam_assert;
 
 #[repr(C)]
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 pub struct DTransform3 {
     pub translation: DVec3,
     pub rotation: DQuat,
     pub scale: DVec3,
+}
+
+impl Default for DTransform3 {
+    #[inline]
+    fn default() -> Self {
+        Self::IDENTITY
+    }
 }
 
 impl DTransform3 {
@@ -23,7 +30,7 @@ impl DTransform3 {
     pub const ZERO: Self = Self {
         translation: DVec3::ZERO,
         rotation: DQuat::IDENTITY,
-        scale: DVec3::ONE,
+        scale: DVec3::ZERO,
     };
 
     /// The identity transform.
@@ -245,7 +252,7 @@ impl DTransform3 {
     #[inline]
     #[must_use]
     pub fn is_nan(&self) -> bool {
-        self.translation.is_nan() && self.rotation.is_nan() && self.scale.is_nan()
+        self.translation.is_nan() || self.rotation.is_nan() || self.scale.is_nan()
     }
 
     /// Returns true if the absolute difference of all elements between `self` and `rhs`

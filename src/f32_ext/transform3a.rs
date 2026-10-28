@@ -6,13 +6,20 @@ use glam::{Affine3A, Mat3, Mat3A, Mat4, Quat, Vec3, Vec3A};
 use crate::macros::glam_assert;
 
 #[repr(C)]
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize))]
 pub struct Transform3A {
     pub translation: Vec3A,
     pub rotation: Quat,
     pub scale: Vec3A,
+}
+
+impl Default for Transform3A {
+    #[inline]
+    fn default() -> Self {
+        Self::IDENTITY
+    }
 }
 
 impl Transform3A {
@@ -23,7 +30,7 @@ impl Transform3A {
     pub const ZERO: Self = Self {
         translation: Vec3A::ZERO,
         rotation: Quat::IDENTITY,
-        scale: Vec3A::ONE,
+        scale: Vec3A::ZERO,
     };
 
     /// The identity transform.
@@ -270,7 +277,7 @@ impl Transform3A {
     #[inline]
     #[must_use]
     pub fn is_nan(&self) -> bool {
-        self.translation.is_nan() && self.rotation.is_nan() && self.scale.is_nan()
+        self.translation.is_nan() || self.rotation.is_nan() || self.scale.is_nan()
     }
 
     /// Returns true if the absolute difference of all elements between `self` and `rhs`

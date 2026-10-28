@@ -1,9 +1,9 @@
 use rkyv::rancor::Fallible;
 use rkyv::{Archive, Deserialize, Place, Serialize};
 
-use crate::Vec2xz;
 #[cfg(feature = "f64")]
 use crate::DVec2xz;
+use crate::Vec2xz;
 
 #[cfg(feature = "bytecheck")]
 macro_rules! impl_rkyv {
